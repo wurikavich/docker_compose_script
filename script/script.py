@@ -106,7 +106,7 @@ def main():
         while True:
             insert_data(connect, cursor, generate_date(config.LENGTH_STRING))
             count_record += 1
-            logger.info(f'Добавлена запись в таблицу с id - {count_record}')
+            logger.info(f'Добавлена запись в таблицу.')
             if count_record >= config.MAX_RECORDS:
                 cursor.execute("SELECT COUNT(*) FROM my_table;")
                 if cursor.fetchone()[0] >= config.MAX_RECORDS:
