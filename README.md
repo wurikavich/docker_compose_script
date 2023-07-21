@@ -90,4 +90,4 @@ id |              data              |            date
 - Docker-compose
 
 ## Разработчики
-- [Александр Гетманов](https://github.com/wurikavich) - Backend
+- [Александр Гетманов](https://github.com/wurikavich)
