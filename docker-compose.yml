@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:11.20-alpine3.18
+    restart: always
+    volumes:
+      - data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - database
+    volumes:
+      - logs:/app/logs
+    env_file:
+      - ./.env
+
+volumes:
+  data:
+  logs:
