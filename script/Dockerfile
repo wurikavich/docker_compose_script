@@ -5,6 +5,6 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r /temp/requirements.txt
 
 WORKDIR /app
-COPY script.py .
+COPY . .
 
 CMD ["python", "script.py"]

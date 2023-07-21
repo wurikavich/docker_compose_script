@@ -10,9 +10,7 @@ services:
       - ./.env
 
   python:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: ./script/
     restart: always
     depends_on:
       - database
