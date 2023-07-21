@@ -88,32 +88,64 @@ def check_environment() -> bool:
     )
 
 
+def compare_count(connect, cursor, count_record: int) -> int:
+    """
+    Сравнивает количество созданных записей с фактическим количеством в таблице.
+    Параметры:
+        connect, cursor -  Обязательные, необходимо для работы с БД.
+        count_record - Обязательные, количество созданных записей.
+    Возвращает обнуленный счетчик, если количество созданных записей равно фактическим.
+    В противном случае останавливает программу с сообщением об ошибке.
+    """
+    cursor.execute("SELECT COUNT(*) FROM my_table;")
+    table_records = cursor.fetchone()[0]
+    if table_records == config.MAX_RECORDS:
+        clearing_table(connect, cursor)
+        logger.info(
+            f"Количество записей в таблице - {table_records}. "
+            f"Максимально допустимое количество записей {config.MAX_RECORDS}. "
+            f"Все записи были удалены. Счетчик id записи пошел с 1."
+        )
+        count_record: int = 0
+        return count_record
+    elif table_records != config.MAX_RECORDS:
+        message = (
+            f"Ошибка! Количество записей созданных программой ({count_record})"
+            f" не соответствует количеству записей в таблице ({table_records})!"
+        )
+    else:
+        message = (
+            f"Ошибка при попытке сравнения количества записей!"
+            f"Программа создала {count_record} записей в таблицу. "
+            f"Фактических записей в таблице - {table_records})!"
+        )
+    logger.critical(message)
+    sys.exit(message)
+
+
 def main():
     """Основная логика работы скрипта."""
     if not check_environment():
-        logger.critical('Отсутствуют одна или несколько переменных окружения!')
-        sys.exit('Отсутствуют одна или несколько переменных окружения!')
+        logger.critical("Отсутствуют одна или несколько переменных окружения!")
+        sys.exit("Отсутствуют одна или несколько переменных окружения!")
 
-    logger.info('Скрипт запущен.')
+    logger.info("Cкрипт запущен.")
 
     try:
         connect = connect_base()
-        logger.info('Выполнено подключение К БД.')
+        logger.info("Выполнено подключение К БД.")
         cursor = connect.cursor()
         create_table(connect, cursor, config.LENGTH_STRING)
-        logger.info('Создана таблица.')
+        logger.info("Создана таблица.")
         count_record: int = 0
         while True:
             insert_data(connect, cursor, generate_date(config.LENGTH_STRING))
             count_record += 1
-            logger.info(f'Добавлена запись в таблицу.')
-            if count_record >= config.MAX_RECORDS:
-                cursor.execute("SELECT COUNT(*) FROM my_table;")
-                if cursor.fetchone()[0] >= config.MAX_RECORDS:
-                    clearing_table(connect, cursor)
-                    logger.info(f'Достигнуто максимальное количество записей - {count_record}.Таблица очищена.')
-                    count_record: int = 0
+            logger.info(f"Добавлена запись в таблицу. Количество записей в таблице - {count_record}.")
             time.sleep(config.QUERY_RETRY_TIME)
+            if count_record < config.MAX_RECORDS:
+                continue
+            count_record = compare_count(connect, cursor, count_record)
     except Exception as error:
         logger.error(error, exc_info=True)
 

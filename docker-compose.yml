@@ -11,7 +11,6 @@ services:
 
   python:
     build: ./script/
-    restart: always
     depends_on:
       - database
     volumes:
